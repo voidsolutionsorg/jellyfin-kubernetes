@@ -2,7 +2,7 @@
 
 This is a Helm chart repo for [jellyfin-rffmpeg](https://github.com/aleksasiriski/jellyfin-rffmpeg) and [jellyfin-rffmpeg-intro-skipper](https://github.com/aleksasiriski/jellyfin-rffmpeg-intro-skipper)
 
-## Kubernetes
+### Kubernetes
 
 On Kubernetes you can use [Longhorn](https://longhorn.io) RWX volumes (NFSv4) and mount said paths to Jellyfin host and workers (must be exactly the same mount points!).
 
