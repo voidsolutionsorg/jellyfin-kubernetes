@@ -1,0 +1,17 @@
+{{- if .Values.jellyfin.service.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.jellyfin.name }}
+  labels:
+    app: {{ .Values.jellyfin.name }}
+spec:
+  type: {{ .Values.jellyfin.service.type }}
+  ports:
+    - port: {{ .Values.jellyfin.service.port }}
+      targetPort: jellyfin-http
+      protocol: TCP
+      name: jellyfin-http
+  selector:
+    app: {{ .Values.jellyfin.name }}
+{{- end -}}

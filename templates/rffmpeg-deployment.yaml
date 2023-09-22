@@ -1,0 +1,68 @@
+# yaml-language-server: helm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.rffmpeg.name }}
+  labels:
+    app: {{ .Values.rffmpeg.name }}
+spec:
+  replicas: {{ .Values.rffmpeg.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.rffmpeg.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.rffmpeg.name }}
+    spec:
+      containers:
+        - name: {{ .Values.rffmpeg.name }}
+          image: "{{ .Values.rffmpeg.image.repository }}:{{ .Values.rffmpeg.image.tag }}"
+          imagePullPolicy: {{ .Values.rffmpeg.image.pullPolicy }}
+          env:
+            - name: SSH_USERS
+              value: "kah:1000:1000"
+            - name: TZ
+              value: {{ .Values.rffmpeg.timezone }}
+          ports:
+            - name: rffmpeg-ssh
+              containerPort: 22
+              protocol: TCP
+          volumeMounts:
+          {{- if .Values.persistence.config.enabled }}
+            - mountPath: /config/data/subtitles
+              name: jellyfin-config
+              readOnly: false
+              subPath: data/subtitles
+            - mountPath: /config/transcodes
+              name: jellyfin-config
+              readOnly: false
+              subPath: transcodes
+          {{- end }}
+            - mountPath: /etc/authorized_keys/kah
+              name: rffmpeg-ssh
+              readOnly: true
+              subPath: id_rsa.pub
+          {{- if .Values.persistence.media.enabled }}
+            - mountPath: /data/media
+              name: jellyfin-media
+              readOnly: true
+          {{- end }}
+      volumes:
+      {{- if .Values.persistence.config.enabled }}
+        - name: jellyfin-config
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+      {{- end }}
+        - name: rffmpeg-config
+          configMap:
+            name: rffmpeg-config
+        - name: rffmpeg-ssh
+          secret:
+            secretName: rffmpeg-ssh
+      {{- if .Values.persistence.media.enabled }}
+        - name: jellyfin-media 
+          persistentVolumeClaim:
+            claimName: jellyfin-media
+      {{- end }}

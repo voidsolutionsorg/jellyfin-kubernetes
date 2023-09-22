@@ -1,0 +1,82 @@
+# yaml-language-server: helm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.jellyfin.name }}
+  labels:
+    app: {{ .Values.jellyfin.name }}
+spec:
+  replicas: {{ .Values.jellyfin.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.jellyfin.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.jellyfin.name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.jellyfin.image.repository }}:{{ .Values.jellyfin.image.tag }}"
+          imagePullPolicy: {{ .Values.jellyfin.image.pullPolicy }}
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  [
+                    "/bin/sh",
+                    "-c",
+                    "rffmpeg add --name rffmpeg-workers {{ .Values.rffmpeg.service.name }}.{{ .Release.Namespace }}.svc.cluster.local"
+                  ]
+          env:
+            - name: TZ
+              value: {{ .Values.jellyfin.timezone }}
+          ports:
+            - name: jellyfin-http
+              containerPort: 8096
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: jellyfin-http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: jellyfin-http
+          volumeMounts:
+          {{- if .Values.persistence.config.enabled }}
+            - mountPath: /config
+              name: jellyfin-config
+              readOnly: false
+          {{- end }}
+            - mountPath: /config/ssh/id_rsa
+              name: rffmpeg-ssh
+              subPath: id_rsa
+              readOnly: true
+            - mountPath: /etc/rffmpeg/rffmpeg.yml
+              name: rffmpeg-config
+              subPath: rffmpeg.yml
+              readOnly: true
+          {{- if .Values.persistence.media.enabled }}
+            - mountPath: /data/media
+              name: jellyfin-media
+              readOnly: false
+          {{- end }}
+      volumes:
+      {{- if .Values.persistence.config.enabled }}
+        - name: jellyfin-config
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+      {{- end }}
+        - name: rffmpeg-config
+          configMap:
+            name: rffmpeg-config
+        - name: rffmpeg-ssh
+          secret:
+            secretName: rffmpeg-ssh
+      {{- if .Values.persistence.media.enabled }}
+        - name: jellyfin-media 
+          persistentVolumeClaim:
+            claimName: jellyfin-media
+      {{- end }}

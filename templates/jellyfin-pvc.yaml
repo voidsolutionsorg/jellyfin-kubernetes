@@ -1,0 +1,32 @@
+{{- if .Values.persistence.config.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-config
+  labels:
+    app: jellyfin
+spec:
+  accessModes:
+    - {{ .Values.persistence.config.accessMode }}
+  storageClassName: {{ .Values.persistence.config.className }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.config.size }}
+{{- end -}}
+{{- if .Values.persistence.media.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-media
+  labels:
+    app: jellyfin
+spec:
+  accessModes:
+    - {{ .Values.persistence.media.accessMode }}
+  storageClassName: {{ .Values.persistence.media.className }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.media.size }}
+{{- end -}}
