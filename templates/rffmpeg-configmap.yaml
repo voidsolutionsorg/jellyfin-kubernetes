@@ -5,9 +5,11 @@ metadata:
   name: rffmpeg-config
 data:
   rffmpeg.yml: |
+  {{- with .Values.rffmpeg_config.program }}
     program:
-      log: "/config/log"
-      debug: false
+      log: {{ .log }}
+      debug: {{ .debug }}
+  {{- end }}
 
     directories:
       persist: "/run/shm"
@@ -28,11 +30,15 @@ data:
       fallback_ffmpeg: "/usr/lib/jellyfin-ffmpeg/ffmpeg"
       fallback_ffprobe: "/usr/lib/jellyfin-ffmpeg/ffprobe"
 
+  {{- with .Values.rffmpeg_config.database }}
     database:
-      type: sqlite
-      path: "/config/rffmpeg/db"
-      #host: localhost
-      #port: 5432
-      #name: rffmpeg
-      #username: postgres
-      #password: ""
+      type: {{ .type }}
+      path: {{ .path }}
+    {{- if ne .type "sqlite"}}
+      host: {{ .host }}
+      port: {{ .port }}
+      name: {{ .name }}
+      username: {{ .username }}
+      password: {{ .password }}
+    {{- end }}
+  {{- end }}

@@ -10,27 +10,34 @@ jellyfin:
 
   image:
     repository: ghcr.io/aleksasiriski/jellyfin-rffmpeg
+    # Optionally use image below which includes the intro skipper patch
+    # repository: ghcr.io/aleksasiriski/jellyfin-rffmpeg-intro-skipper
     pullPolicy: IfNotPresent
     tag: latest
 
   service:
-    enabled: true
+    # Enable service to access jellyfin within the cluster
+    enabled: false
     type: ClusterIP
-    port: 80
+    port: 8096
 
   ingress:
+    # Enable ingress to access jellyfin outside the cluster
     enabled: false
     className: ""
     annotations: {}
 
     hosts:
-      - chart-example.local 
+      - jellyfin.example.local
     path: /
 
+  # Add extra volumes and mount points
+  # An example would be an NFS mount for media storage
   extraVolumeMounts: []
   extraVolumes: []
 
 rffmpeg:
+  # Each replica can manage on transcode at a time
   replicaCount: 3
 
   name: rffmpeg
@@ -42,32 +49,61 @@ rffmpeg:
     tag: latest
 
   service:
+    # Required so jellyfin can connect to start transcodes
     enabled: true
     name: rffmpeg-workers
     type: ClusterIP
     port: 22
 
+  # In addition to mirroring jellyfin volume mount
+  # you may want to mount host files for hardware decoding
   extraVolumeMounts: []
   extraVolumes: []
 
 persistence:
   config:
+    # Allow jellyfin setting to persist if the container is destroyed
+    # required unless using subtitles/transcodes volumes below
     enabled: true
     accessMode: ReadWriteMany
     className: longhorn
     size: 10Gi
+
   subtitles:
+    # Seperate volume for subtitles
+    # Allow greater control instead of
+    # everything being in /config
     enabled: false
     accessMode: ReadWriteMany
     className: longhorn
     size: 10Gi
+
   transcodes:
+    # Same as subtitle comment above
+    # May need more storage for large video files
     enabled: false
     accessMode: ReadWriteMany
     className: longhorn
     size: 30Gi
+
   media:
+    # Mostly for testing, should use a different volume
+    # such as seperate NFS share for bulk media storage
     enabled: false
     accessMode: ReadWriteMany
     className: longhorn
     size: 10Gi
+
+rffmpeg_config:
+  program:
+    log: "/config/log"
+    debug: false
+
+  database:
+    type: sqlite
+    path: "/config/rffmpeg/db"
+    #host: localhost
+    #port: 5432
+    #name: rffmpeg
+    #username: postgres
+    #password: ""
