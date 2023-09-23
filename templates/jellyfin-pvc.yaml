@@ -14,6 +14,38 @@ spec:
     requests:
       storage: {{ .Values.persistence.config.size }}
 {{- end -}}
+{{- if .Values.persistence.subtitles.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-subtitles
+  labels:
+    app: jellyfin
+spec:
+  accessModes:
+    - {{ .Values.persistence.subtitles.accessMode }}
+  storageClassName: {{ .Values.persistence.subtitles.className }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.subtitles.size }}
+{{- end -}}
+{{- if .Values.persistence.transcodes.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-transcodes
+  labels:
+    app: jellyfin
+spec:
+  accessModes:
+    - {{ .Values.persistence.transcodes.accessMode }}
+  storageClassName: {{ .Values.persistence.transcodes.className }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.transcodes.size }}
+{{- end -}}
 {{- if .Values.persistence.media.enabled }}
 ---
 apiVersion: v1

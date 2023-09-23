@@ -50,6 +50,16 @@ persistence:
     accessMode: ReadWriteMany
     className: longhorn
     size: 10Gi
+  subtitles:
+    enabled: false
+    accessMode: ReadWriteMany
+    className: longhorn
+    size: 10Gi
+  transcodes:
+    enabled: false
+    accessMode: ReadWriteMany
+    className: longhorn
+    size: 30Gi
   media:
     enabled: false
     accessMode: ReadWriteMany

@@ -3,23 +3,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.jellyfin.name }}
+      {{- with .Values.jellyfin }}
+  name: {{ .name }}
   labels:
-    app: {{ .Values.jellyfin.name }}
+    app: {{ .name }}
 spec:
-  replicas: {{ .Values.jellyfin.replicaCount }}
+  replicas: {{ .replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.jellyfin.name }}
+      app: {{ .name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.jellyfin.name }}
+        app: {{ .name }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.jellyfin.image.repository }}:{{ .Values.jellyfin.image.tag }}"
-          imagePullPolicy: {{ .Values.jellyfin.image.pullPolicy }}
+        - name: {{ .name }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
           lifecycle:
             postStart:
               exec:
@@ -27,11 +28,12 @@ spec:
                   [
                     "/bin/sh",
                     "-c",
-                    "rffmpeg add --name rffmpeg-workers {{ .Values.rffmpeg.service.name }}.{{ .Release.Namespace }}.svc.cluster.local"
+                    "rffmpeg add --name rffmpeg-workers {{ $.Values.rffmpeg.service.name }}.{{ $.Release.Namespace }}.svc.cluster.local"
                   ]
           env:
             - name: TZ
-              value: {{ .Values.jellyfin.timezone }}
+              value: {{ .timezone }}
+      {{- end }}
           ports:
             - name: jellyfin-http
               containerPort: 8096
@@ -45,9 +47,20 @@ spec:
               path: /health
               port: jellyfin-http
           volumeMounts:
-          {{- if .Values.persistence.config.enabled }}
+    {{- with .Values.persistence }}
+          {{- if .config.enabled }}
             - mountPath: /config
               name: jellyfin-config
+              readOnly: false
+          {{- end }}
+          {{- if .subtitles.enabled }}
+            - mountPath: /config/data/subtitles
+              name: jellyfin-subtitles
+              readOnly: false
+          {{- end }}
+          {{- if .transcodes.enabled }}
+            - mountPath: /config/transcodes
+              name: jellyfin-transcodes
               readOnly: false
           {{- end }}
             - mountPath: /config/ssh/id_rsa
@@ -58,13 +71,13 @@ spec:
               name: rffmpeg-config
               subPath: rffmpeg.yml
               readOnly: true
-          {{- if .Values.persistence.media.enabled }}
+          {{- if .media.enabled }}
             - mountPath: /data/media
               name: jellyfin-media
               readOnly: false
           {{- end }}
       volumes:
-      {{- if .Values.persistence.config.enabled }}
+      {{- if .config.enabled }}
         - name: jellyfin-config
           persistentVolumeClaim:
             claimName: jellyfin-config
@@ -75,8 +88,9 @@ spec:
         - name: rffmpeg-ssh
           secret:
             secretName: rffmpeg-ssh
-      {{- if .Values.persistence.media.enabled }}
+      {{- if .media.enabled }}
         - name: jellyfin-media 
           persistentVolumeClaim:
             claimName: jellyfin-media
       {{- end }}
+    {{- end }}
