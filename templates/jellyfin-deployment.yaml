@@ -76,6 +76,9 @@ spec:
               name: jellyfin-media
               readOnly: false
           {{- end }}
+          {{- if $.Values.jellyfin.extraVolumeMounts }}
+          {{- toYaml $.Values.jellyfin.extraVolumeMounts | nindent 12 }}
+          {{- end }}
       volumes:
       {{- if .config.enabled }}
         - name: jellyfin-config
@@ -94,3 +97,6 @@ spec:
             claimName: jellyfin-media
       {{- end }}
     {{- end }}
+      {{- if .Values.jellyfin.extraVolumes }}
+      {{- toYaml .Values.jellyfin.extraVolumes | nindent 6 }}
+      {{- end }}

@@ -59,6 +59,9 @@ spec:
               name: jellyfin-media
               readOnly: true
           {{- end }}
+          {{- if $.Values.rffmpeg.extraVolumeMounts }}
+          {{- toYaml $.Values.rffmpeg.extraVolumeMounts | nindent 12 }}
+          {{- end }}
       volumes:
       {{- if .config.enabled }}
         - name: jellyfin-config
@@ -77,3 +80,6 @@ spec:
             claimName: jellyfin-media
       {{- end }}
     {{- end }}
+      {{- if .Values.rffmpeg.extraVolumes }}
+      {{- toYaml .Values.rffmpeg.extraVolumes | nindent 6 }}
+      {{- end }}

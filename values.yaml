@@ -27,6 +27,9 @@ jellyfin:
       - chart-example.local 
     path: /
 
+  extraVolumeMounts: []
+  extraVolumes: []
+
 rffmpeg:
   replicaCount: 3
 
@@ -43,6 +46,9 @@ rffmpeg:
     name: rffmpeg-workers
     type: ClusterIP
     port: 22
+
+  extraVolumeMounts: []
+  extraVolumes: []
 
 persistence:
   config:
@@ -65,4 +71,3 @@ persistence:
     accessMode: ReadWriteMany
     className: longhorn
     size: 10Gi
-  extraExistingClaimMounts: []
