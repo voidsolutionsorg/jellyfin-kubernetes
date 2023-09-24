@@ -1,7 +1,7 @@
 1. Get the application URL by running these commands:
 {{- if .Values.jellyfin.ingress.enabled }}
 {{- range $host := .Values.jellyfin.ingress.hosts }}
-  http://{{ $host.host }}{{ .Values.jellyfin.ingress.path }}
+  http://{{ $host }}
 {{- end }}
 {{- else if contains "NodePort" .Values.jellyfin.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "jellyfin-kubernetes.fullname" . }})

@@ -85,6 +85,16 @@ spec:
           persistentVolumeClaim:
             claimName: jellyfin-config
       {{- end }}
+      {{- if .subtitles.enabled }}
+        - name: jellyfin-subtitles
+          persistentVolumeClaim:
+            claimName: jellyfin-subtitles
+      {{- end }}
+      {{- if .transcodes.enabled }}
+        - name: jellyfin-transcodes
+          persistentVolumeClaim:
+            claimName: jellyfin-transcodes
+      {{- end }}
         - name: rffmpeg-config
           configMap:
             name: rffmpeg-config
@@ -98,5 +108,5 @@ spec:
       {{- end }}
     {{- end }}
       {{- if .Values.jellyfin.extraVolumes }}
-      {{- toYaml .Values.jellyfin.extraVolumes | nindent 6 }}
+      {{- toYaml .Values.jellyfin.extraVolumes | nindent 8 }}
       {{- end }}
