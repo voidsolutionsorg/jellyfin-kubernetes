@@ -65,9 +65,9 @@ spec:
               name: jellyfin-transcodes
               readOnly: false
           {{- end }}
-            - mountPath: /config/ssh/id_rsa
+            - mountPath: /config/ssh/private_key
               name: rffmpeg-ssh
-              subPath: id_rsa
+              subPath: private_key
               readOnly: true
             - mountPath: /etc/rffmpeg/rffmpeg.yml
               name: rffmpeg-config

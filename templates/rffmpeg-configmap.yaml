@@ -21,7 +21,7 @@ data:
       persist: 300
       args:
         - "-i"
-        - "/config/ssh/id_rsa"
+        - "/config/ssh/private_key"
         - "-p"
         - {{ .Values.rffmpeg.service.port | quote }}
 

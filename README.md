@@ -9,6 +9,6 @@ On Kubernetes you can use [Longhorn](https://longhorn.io) RWX volumes (NFSv4) an
 You will need to generate an ssh key pair and add them as a secret using the commands below. Make sure this is done in the same namespace as the helm install.
 
 ```bash
-ssh-keygen -t rsa -N '' -f ./id_rsa
-kubectl create secret generic rffmpeg-ssh --from-file=./id_rsa --from-file=./id_rsa.pub
+ssh-keygen -N '' -f ./id_rsa
+kubectl create secret generic rffmpeg-ssh --from-file=private_key=./id_rsa --from-file=public_key=./id_rsa.pub
 ```

@@ -52,7 +52,7 @@ spec:
             - mountPath: /etc/authorized_keys/kah
               name: rffmpeg-ssh
               readOnly: true
-              subPath: id_rsa.pub
+              subPath: public_key
           {{- if .media.enabled }}
             - mountPath: /data/media
               name: jellyfin-media
