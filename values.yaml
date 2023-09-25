@@ -18,6 +18,7 @@ jellyfin:
   service:
     # Enable service to access jellyfin within the cluster
     enabled: false
+    name: jellyfin
     type: ClusterIP
     clusterIP: ""
     port: 8096

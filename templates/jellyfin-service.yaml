@@ -1,18 +1,22 @@
-{{- if .Values.jellyfin.service.enabled -}}
+{{- with .Values.jellyfin }}
+  {{- if .service.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.jellyfin.name }}
+  name: {{ .service.name }}
   labels:
-    app: {{ .Values.jellyfin.name }}
+    app: {{ .name }}
 spec:
-  type: {{ .Values.jellyfin.service.type }}
-  clusterIP: {{ .Values..service.clusterIP }}
+  type: {{ .service.type }}
+          {{- if .service.clusterIP }}
+  clusterIP: {{ .service.clusterIP }}
+          {{- end }}
   ports:
-    - port: {{ .Values.jellyfin.service.port }}
+    - port: {{ .service.port }}
       targetPort: jellyfin-http
       protocol: TCP
       name: jellyfin-http
   selector:
-    app: {{ .Values.jellyfin.name }}
+    app: {{ .name }}
+  {{- end -}}
 {{- end -}}
