@@ -7,6 +7,7 @@ metadata:
     app: {{ .Values.rffmpeg.service.name }}
 spec:
   type: {{ .Values.rffmpeg.service.type }}
+  clusterIP: {{ .Values.rffmpeg.service.clusterIP }}
   ports:
     - port: {{ .Values.rffmpeg.service.port }}
       targetPort: rffmpeg-ssh

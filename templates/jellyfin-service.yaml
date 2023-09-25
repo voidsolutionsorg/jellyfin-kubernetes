@@ -7,6 +7,7 @@ metadata:
     app: {{ .Values.jellyfin.name }}
 spec:
   type: {{ .Values.jellyfin.service.type }}
+  clusterIP: {{ .Values..service.clusterIP }}
   ports:
     - port: {{ .Values.jellyfin.service.port }}
       targetPort: jellyfin-http

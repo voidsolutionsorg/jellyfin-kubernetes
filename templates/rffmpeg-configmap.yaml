@@ -22,6 +22,8 @@ data:
       args:
         - "-i"
         - "/config/ssh/id_rsa"
+        - "-p"
+        - {{ .Values.rffmpeg.service.port | quote }}
 
     commands:
       ssh: "/usr/bin/ssh"

@@ -1,13 +1,12 @@
 # yaml-language-server: helm
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
       {{- with .Values.rffmpeg }}
   name: {{ .name }}
-  labels:
-    app: {{ .name }}
 spec:
+  serviceName: {{ .service.name }}
   replicas: {{ .replicaCount }}
   selector:
     matchLabels:

@@ -21,19 +21,21 @@ spec:
         - name: {{ .name }}
           image: "{{ .image.repository }}:{{ .image.tag }}"
           imagePullPolicy: {{ .image.pullPolicy }}
+      {{- end }}
           lifecycle:
             postStart:
               exec:
                 command:
+                  {{- with .Values.rffmpeg }}
                   [
                     "/bin/sh",
                     "-c",
-                    "rffmpeg add --name rffmpeg-workers {{ $.Values.rffmpeg.service.name }}.{{ $.Release.Namespace }}.svc.cluster.local"
+                    "for i in $(seq 0 {{ sub .replicaCount 1 }}); do rffmpeg add --name  {{ .name }}-$i {{ .name }}-$i.{{ .service.name }}.{{ $.Release.Namespace }}.svc.cluster.local; done"
                   ]
+                  {{- end }}
           env:
             - name: TZ
-              value: {{ .timezone }}
-      {{- end }}
+              value: {{ .Values.jellyfin.timezone }}
           ports:
             - name: jellyfin-http
               containerPort: 8096

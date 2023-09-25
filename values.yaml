@@ -19,6 +19,7 @@ jellyfin:
     # Enable service to access jellyfin within the cluster
     enabled: false
     type: ClusterIP
+    clusterIP: ""
     port: 8096
 
   ingress:
@@ -53,6 +54,7 @@ rffmpeg:
     enabled: true
     name: rffmpeg-workers
     type: ClusterIP
+    clusterIP: None
     port: 22
 
   # In addition to mirroring jellyfin volume mount
