@@ -31,6 +31,7 @@ jellyfin:
 
     hosts:
       - jellyfin.example.local
+    # Changing the base path is known to break HDHomeRun/Sonarr/Radarr/Chromecast
     path: /
 
   # Add extra volumes and mount points

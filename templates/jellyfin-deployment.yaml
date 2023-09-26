@@ -56,12 +56,12 @@ spec:
               readOnly: false
           {{- end }}
           {{- if .subtitles.enabled }}
-            - mountPath: /config/data/subtitles
+            - mountPath: /data/subtitles
               name: jellyfin-subtitles
               readOnly: false
           {{- end }}
           {{- if .transcodes.enabled }}
-            - mountPath: /config/transcodes
+            - mountPath: /data/transcodes
               name: jellyfin-transcodes
               readOnly: false
           {{- end }}

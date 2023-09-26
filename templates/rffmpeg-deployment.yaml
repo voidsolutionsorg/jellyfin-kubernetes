@@ -33,10 +33,10 @@ spec:
       {{- end }}
     {{- with .Values.persistence }}
           {{- if and .subtitles.enabled .transcodes.enabled}}
-            - mountPath: /config/data/subtitles
+            - mountPath: /data/subtitles
               name: jellyfin-subtitles
               readOnly: false
-            - mountPath: /config/transcodes
+            - mountPath: /data/transcodes
               name: jellyfin-transcodes
               readOnly: false
           {{- else }}
@@ -44,7 +44,7 @@ spec:
               name: jellyfin-config
               readOnly: false
               subPath: data/subtitles
-            - mountPath: /config/transcodes
+            - mountPath: /config/data/transcodes
               name: jellyfin-config
               readOnly: false
               subPath: transcodes
