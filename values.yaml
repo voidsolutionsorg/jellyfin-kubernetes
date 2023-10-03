@@ -2,81 +2,112 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+jellyfin:
+  replicaCount: 1
 
-image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  name: jellyfin
+  timezone: America/New_York
 
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+  image:
+    repository: ghcr.io/aleksasiriski/jellyfin-rffmpeg
+    # Optionally use image below which includes the intro skipper patch
+    # repository: ghcr.io/aleksasiriski/jellyfin-rffmpeg-intro-skipper
+    pullPolicy: IfNotPresent
+    tag: latest
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
+  service:
+    # Enable service to access jellyfin within the cluster
+    enabled: false
+    name: jellyfin
+    type: ClusterIP
+    clusterIP: ""
+    port: 8096
 
-podAnnotations: {}
+  ingress:
+    # Enable ingress to access jellyfin outside the cluster
+    enabled: false
+    className: ""
+    annotations: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+    hosts:
+      - jellyfin.example.local
+    # Changing the base path is known to break HDHomeRun/Sonarr/Radarr/Chromecast
+    path: /
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+  # Add extra volumes and mount points
+  # An example would be an NFS mount for media storage
+  extraVolumeMounts: []
+  extraVolumes: []
 
-service:
-  type: ClusterIP
-  port: 80
+rffmpeg:
+  # Each replica can manage on transcode at a time
+  replicaCount: 3
 
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  name: rffmpeg
+  timezone: America/New_York
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  image:
+    repository: ghcr.io/aleksasiriski/rffmpeg-worker
+    pullPolicy: IfNotPresent
+    tag: latest
 
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  service:
+    # Required so jellyfin can connect to start transcodes
+    enabled: true
+    name: rffmpeg-workers
+    type: ClusterIP
+    clusterIP: None
+    port: 22
 
-nodeSelector: {}
+  # In addition to mirroring jellyfin volume mount
+  # you may want to mount host files for hardware decoding
+  extraVolumeMounts: []
+  extraVolumes: []
 
-tolerations: []
+persistence:
+  config:
+    # Allow jellyfin setting to persist if the container is destroyed
+    # required unless using subtitles/transcodes volumes below
+    enabled: true
+    accessMode: ReadWriteMany
+    className: longhorn
+    size: 10Gi
 
-affinity: {}
+  subtitles:
+    # Seperate volume for subtitles
+    # Allow greater control instead of
+    # everything being in /config
+    enabled: false
+    accessMode: ReadWriteMany
+    className: longhorn
+    size: 10Gi
+
+  transcodes:
+    # Same as subtitle comment above
+    # May need more storage for large video files
+    enabled: false
+    accessMode: ReadWriteMany
+    className: longhorn
+    size: 30Gi
+
+  media:
+    # Mostly for testing, should use a different volume
+    # such as seperate NFS share for bulk media storage
+    enabled: false
+    accessMode: ReadWriteMany
+    className: longhorn
+    size: 10Gi
+
+rffmpeg_config:
+  program:
+    log: "/config/log"
+    debug: false
+
+  database:
+    type: sqlite
+    path: "/config/rffmpeg/db"
+    #host: localhost
+    #port: 5432
+    #name: rffmpeg
+    #username: postgres
+    #password: ""

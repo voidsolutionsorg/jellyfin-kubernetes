@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rffmpeg-config
+data:
+  rffmpeg.yml: |
+  {{- with .Values.rffmpeg_config.program }}
+    program:
+      log: {{ .log }}
+      debug: {{ .debug }}
+  {{- end }}
+
+    directories:
+      persist: "/run/shm"
+      owner: kah
+      group: kah
+
+    remote:
+      user: kah
+      persist: 300
+      args:
+        - "-i"
+        - "/config/ssh/private_key"
+        - "-p"
+        - {{ .Values.rffmpeg.service.port | quote }}
+
+    commands:
+      ssh: "/usr/bin/ssh"
+      ffmpeg: "/usr/lib/jellyfin-ffmpeg/ffmpeg"
+      ffprobe: "/usr/lib/jellyfin-ffmpeg/ffprobe"
+      fallback_ffmpeg: "/usr/lib/jellyfin-ffmpeg/ffmpeg"
+      fallback_ffprobe: "/usr/lib/jellyfin-ffmpeg/ffprobe"
+
+  {{- with .Values.rffmpeg_config.database }}
+    database:
+      type: {{ .type }}
+      path: {{ .path }}
+    {{- if ne .type "sqlite"}}
+      host: {{ .host }}
+      port: {{ .port }}
+      name: {{ .name }}
+      username: {{ .username }}
+      password: {{ .password }}
+    {{- end }}
+  {{- end }}

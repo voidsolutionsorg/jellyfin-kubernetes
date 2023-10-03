@@ -1,0 +1,22 @@
+{{- with .Values.rffmpeg }}
+  {{- if .service.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .service.name }}
+  labels:
+    app: {{ .name }}
+spec:
+  type: {{ .service.type }}
+          {{- if .service.clusterIP }}
+  clusterIP: {{ .service.clusterIP }}
+          {{- end }}
+  ports:
+    - port: {{ .service.port }}
+      targetPort: rffmpeg-ssh
+      protocol: TCP
+      name: rffmpeg-ssh
+  selector:
+    app: {{ .name }}
+  {{- end -}}
+{{- end -}}

@@ -1,0 +1,91 @@
+# yaml-language-server: helm
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+      {{- with .Values.rffmpeg }}
+  name: {{ .name }}
+spec:
+  serviceName: {{ .service.name }}
+  replicas: {{ .replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+    spec:
+      containers:
+        - name: {{ .name }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          env:
+            - name: SSH_USERS
+              value: "kah:1000:1000"
+            - name: TZ
+              value: {{ .timezone }}
+          ports:
+            - name: rffmpeg-ssh
+              containerPort: 22
+              protocol: TCP
+          volumeMounts:
+      {{- end }}
+    {{- with .Values.persistence }}
+          {{- if and .subtitles.enabled .transcodes.enabled}}
+            - mountPath: /data/subtitles
+              name: jellyfin-subtitles
+              readOnly: false
+            - mountPath: /data/transcodes
+              name: jellyfin-transcodes
+              readOnly: false
+          {{- else }}
+            - mountPath: /config/data/subtitles
+              name: jellyfin-config
+              readOnly: false
+              subPath: data/subtitles
+            - mountPath: /config/data/transcodes
+              name: jellyfin-config
+              readOnly: false
+              subPath: transcodes
+          {{- end }}
+            - mountPath: /etc/authorized_keys/kah
+              name: rffmpeg-ssh
+              readOnly: true
+              subPath: public_key
+          {{- if .media.enabled }}
+            - mountPath: /data/media
+              name: jellyfin-media
+              readOnly: true
+          {{- end }}
+          {{- if $.Values.rffmpeg.extraVolumeMounts }}
+          {{- toYaml $.Values.rffmpeg.extraVolumeMounts | nindent 12 }}
+          {{- end }}
+      volumes:
+      {{- if and .subtitles.enabled .transcodes.enabled}}
+        - name: jellyfin-subtitles
+          persistentVolumeClaim:
+            claimName: jellyfin-subtitles
+        - name: jellyfin-transcodes
+          persistentVolumeClaim:
+            claimName: jellyfin-transcodes
+      {{- else }}
+        - name: jellyfin-config
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+      {{- end }}
+        - name: rffmpeg-config
+          configMap:
+            name: rffmpeg-config
+        - name: rffmpeg-ssh
+          secret:
+            secretName: rffmpeg-ssh
+      {{- if .media.enabled }}
+        - name: jellyfin-media 
+          persistentVolumeClaim:
+            claimName: jellyfin-media
+      {{- end }}
+    {{- end }}
+      {{- if .Values.rffmpeg.extraVolumes }}
+      {{- toYaml .Values.rffmpeg.extraVolumes | nindent 8 }}
+      {{- end }}
