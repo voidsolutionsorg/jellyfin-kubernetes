@@ -1,3 +1,6 @@
+# UNMAINTAINED
+This repo will be archived when I finish work on [morana](https://github.com/tminaorg/morana)
+
 # jellyfin-kubernetes
 
 This is a Helm chart repo for [jellyfin-rffmpeg](https://github.com/aleksasiriski/rffmpeg-go/pkgs/container/jellyfin-rffmpeg) and [jellyfin-rffmpeg-intro-skipper](https://github.com/aleksasiriski/rffmpeg-go/pkgs/container/jellyfin-rffmpeg-intro-skipper)
